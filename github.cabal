@@ -107,6 +107,7 @@ Library
     GitHub.Endpoints.Organizations.Members
     GitHub.Endpoints.Organizations.Teams
     GitHub.Endpoints.PullRequests
+    GitHub.Endpoints.PullRequests.Reviews
     GitHub.Endpoints.PullRequests.ReviewComments
     GitHub.Endpoints.Repos
     GitHub.Endpoints.Repos.Collaborators

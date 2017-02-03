@@ -13,6 +13,9 @@ module GitHub.Data.PullRequests (
     PullRequestEvent(..),
     PullRequestEventType(..),
     PullRequestReference(..),
+    PullRequestReview(..),
+    PullRequestReviewState(..),
+    PullRequestReviewAction(..),
     MergeResult(..),
     statusMerge,
     ) where
@@ -176,6 +179,34 @@ instance NFData PullRequestReference where rnf = genericRnf
 instance Binary PullRequestReference
 
 
+data PullRequestReview = PullRequestReview
+    { pullRequestReviewId        :: !(Id PullRequestReview)
+    , pullRequestReviewUser      :: !SimpleUser
+    , pullRequestReviewBody      :: !Text
+    , pullRequestReviewCommitSha :: !Text
+    , pullRequestReviewState     :: !PullRequestReviewState
+    }
+    deriving (Eq, Ord, Show, Generic, Typeable, Data)
+
+instance NFData PullRequestReview where rnf = genericRnf
+instance Binary PullRequestReview
+
+data PullRequestReviewState
+    = PullRequestReviewApproved
+    | PullRequestReviewPending
+    | PullRequestReviewCommented
+    | PullRequestReviewOther !Text  -- GitHub doesn't seem to say what this could be
+    deriving (Show, Data, Typeable, Eq, Ord, Generic)
+
+instance NFData PullRequestReviewState where rnf = genericRnf
+instance Binary PullRequestReviewState
+
+data PullRequestReviewAction
+    = PullRequestReviewApprove
+    | PullRequestReviewRequestChanges
+    | PullRequestReviewComment
+    deriving (Show, Data, Typeable, Eq, Ord, Generic)
+
 -------------------------------------------------------------------------------
 -- JSON instances
 -------------------------------------------------------------------------------
@@ -291,6 +322,25 @@ instance FromJSON PullRequestReference where
         <$> o .:? "html_url"
         <*> o .:? "patch_url"
         <*> o .:? "diff_url"
+
+instance FromJSON PullRequestReview where
+    parseJSON = withObject "PullRequestReview" $ \o -> PullRequestReview
+        <$> o .: "id"
+        <*> o .: "user"
+        <*> o .: "body"
+        <*> o .: "commit_id"
+        <*> o .: "state"
+
+instance FromJSON PullRequestReviewState where
+    parseJSON (String "APPROVED")  = pure PullRequestReviewApproved
+    parseJSON (String "PENDING")   = pure PullRequestReviewPending
+    parseJSON (String "COMMENTED") = pure PullRequestReviewCommented
+    parseJSON other                = PullRequestReviewOther <$> parseJSON other
+
+instance ToJSON PullRequestReviewAction where
+    toJSON PullRequestReviewApprove        = String "APPROVE"
+    toJSON PullRequestReviewRequestChanges = String "REQUEST_CHANGES"
+    toJSON PullRequestReviewComment        = String "COMMENT"
 
 -- Helpers
 

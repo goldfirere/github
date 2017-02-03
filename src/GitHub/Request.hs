@@ -279,7 +279,7 @@ makeHttpSimpleRequest auth r = case r of
     reqHeaders :: RequestHeaders
     reqHeaders = maybe [] getOAuthHeader auth
         <> [("User-Agent", "github.hs/0.7.4")]
-        <> [("Accept", "application/vnd.github.preview")]
+        <> [("Accept", "application/vnd.github.black-cat-preview+json")]
 
     setBody :: LBS.ByteString -> HTTP.Request -> HTTP.Request
     setBody body req = req { requestBody = RequestBodyLBS body }
